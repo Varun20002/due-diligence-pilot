@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Call, CallStatus } from '@/types/call';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ const statusConfig = {
 
 const CallDetails: React.FC<CallDetailsProps> = ({ call }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!call || call.status === CallStatus.DONE || call.status === CallStatus.ERROR) {
@@ -40,6 +42,12 @@ const CallDetails: React.FC<CallDetailsProps> = ({ call }) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleOpenFullReport = () => {
+    if (call) {
+      navigate(`/reports/${call.id}`);
+    }
   };
 
   if (!call) {
@@ -84,7 +92,7 @@ const CallDetails: React.FC<CallDetailsProps> = ({ call }) => {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" size="sm" className="w-full" onClick={handleOpenFullReport}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open Full Report
               </Button>
