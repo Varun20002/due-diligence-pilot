@@ -4,7 +4,6 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 interface RunAgentDrawerProps {
   isOpen: boolean;
@@ -18,7 +17,6 @@ const RunAgentDrawer: React.FC<RunAgentDrawerProps> = ({ isOpen, onClose, onSubm
     phone: '',
     email: '',
     company: '',
-    customPrompt: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,7 +53,6 @@ const RunAgentDrawer: React.FC<RunAgentDrawerProps> = ({ isOpen, onClose, onSubm
         phone: '',
         email: '',
         company: '',
-        customPrompt: '',
       });
       setErrors({});
     }
@@ -140,17 +137,6 @@ const RunAgentDrawer: React.FC<RunAgentDrawerProps> = ({ isOpen, onClose, onSubm
                 placeholder="Acme Corp"
                 value={formData.company}
                 onChange={(e) => handleInputChange('company', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="customPrompt">Custom Prompt</Label>
-              <Textarea
-                id="customPrompt"
-                placeholder="Additional instructions for the AI agent..."
-                rows={4}
-                value={formData.customPrompt}
-                onChange={(e) => handleInputChange('customPrompt', e.target.value)}
               />
             </div>
 
