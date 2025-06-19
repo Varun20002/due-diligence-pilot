@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
 
-## Project info
+# VC Due Diligence Dashboard
 
-**URL**: https://lovable.dev/projects/ad98daff-db52-4a73-839a-af3534040ca3
+A professional dashboard for automated customer validation calls, designed for VC due diligence processes.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Real-time Call Queue**: Monitor call status with live polling every 3 seconds
+- **Live Transcript Streaming**: Watch conversations unfold in real-time
+- **AI-Generated Summaries**: Get comprehensive call summaries with key insights
+- **Run Agent Interface**: Easy-to-use form for initiating new calls
+- **Responsive Design**: Works perfectly on 13" laptops and larger screens
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ad98daff-db52-4a73-839a-af3534040ca3) and start prompting.
+- **Frontend**: React 18 + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **State Management**: React Query for server state
+- **Routing**: React Router
+- **Build Tool**: Vite
 
-Changes made via Lovable will be committed automatically to this repo.
+## Local Development
 
-**Use your preferred IDE**
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Start development server**:
+   ```bash
+   npm run dev
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Open your browser**:
+   Navigate to `http://localhost:8080`
 
-Follow these steps:
+## Project Structure
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/          # Reusable UI components
+│   ├── CallsTable.tsx  # Main calls data table
+│   ├── CallDetails.tsx # Call details and transcript pane
+│   └── RunAgentDrawer.tsx # Form for creating new calls
+├── pages/
+│   └── Dashboard.tsx   # Main dashboard page
+├── services/
+│   └── mockApi.ts      # Mock API service with simulated data
+├── types/
+│   └── call.ts         # TypeScript interfaces
+└── App.tsx             # Main app component with routing
 ```
 
-**Edit a file directly in GitHub**
+## API Endpoints (Mocked)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `GET /calls` - Fetch all calls with status updates
+- `POST /calls` - Create new customer validation call
+- `GET /calls/:id` - Get specific call details
+- `GET /reports/:callId` - Get full call report (stubbed)
 
-**Use GitHub Codespaces**
+## Call Status Flow
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. **Queued** → Call is created and waiting to be dialed
+2. **Dialing** → System is connecting to customer
+3. **In Room** → Call is active, transcript streaming
+4. **RAG** → Call ended, AI processing transcript
+5. **Done** → Summary ready for review
+6. **Error** → Call failed or encountered issues
 
-## What technologies are used for this project?
+## Features in Detail
 
-This project is built with:
+### Call Queue Table
+- Status-coded badges for quick visual scanning
+- Live updates every 3 seconds without page refresh
+- Click any row to view details and transcript
+- Search functionality for filtering calls
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Call Details Pane
+- Real-time elapsed time counter for active calls
+- Live transcript streaming with cursor indicator
+- AI-generated markdown summaries for completed calls
+- "Open Full Report" button for detailed analysis
 
-## How can I deploy this project?
+### Run Agent Drawer
+- Form validation for required fields (name, phone, email)
+- Regex validation for phone numbers and email addresses
+- Optional company and custom prompt fields
+- Disabled submit button until form is valid
 
-Simply open [Lovable](https://lovable.dev/projects/ad98daff-db52-4a73-839a-af3534040ca3) and click on Share -> Publish.
+## Responsive Design
 
-## Can I connect a custom domain to my Lovable project?
+- Desktop: Side-by-side table and details layout
+- Tablet/Mobile: Stacked layout with collapsible details
+- Minimum width: 320px mobile devices
+- Optimized for 13" laptop screens (1280x800)
 
-Yes, you can!
+## Mock Data
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The application includes realistic mock data that simulates:
+- Call progression through different status states
+- Live transcript updates during active calls
+- AI-generated summaries with business insights
+- Realistic timing and duration data
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Future Enhancements
+
+- Real backend API integration
+- User authentication and role management
+- Advanced filtering and sorting options
+- Export functionality for reports
+- Integration with CRM systems
+- Real-time notifications
