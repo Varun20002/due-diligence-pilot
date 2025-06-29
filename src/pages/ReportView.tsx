@@ -21,6 +21,77 @@ const statusConfig = {
   [CallStatus.ERROR]: { color: 'bg-red-100 text-red-800', label: 'Error' },
 };
 
+const formatSummary = (summary: string) => {
+  const lines = summary.split('\n');
+  const formattedContent = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (!line) continue;
+    
+    // Check if it's a heading (starts with # or is a standalone title-like line)
+    if (line.startsWith('#') || (line.match(/^[A-Z][a-zA-Z\s]+$/) && !line.includes('.'))) {
+      const headingText = line.replace(/^#+\s*/, '');
+      formattedContent.push(
+        <h3 key={i} className="text-lg font-bold text-gray-900 mt-6 mb-3 first:mt-0">
+          {headingText}
+        </h3>
+      );
+    }
+    // Check if it's a bullet point or should be formatted as one
+    else if (line.startsWith('-') || line.startsWith('•') || line.match(/^\d+\./)) {
+      const bulletText = line.replace(/^[-•]\s*/, '').replace(/^\d+\.\s*/, '');
+      formattedContent.push(
+        <li key={i} className="text-sm text-gray-700 mb-2">
+          {bulletText}
+        </li>
+      );
+    }
+    // Regular paragraph text
+    else {
+      formattedContent.push(
+        <p key={i} className="text-sm text-gray-700 mb-3">
+          {line}
+        </p>
+      );
+    }
+  }
+  
+  // Group consecutive list items into ul elements
+  const groupedContent = [];
+  let currentList = [];
+  
+  for (let i = 0; i < formattedContent.length; i++) {
+    const item = formattedContent[i];
+    
+    if (item.type === 'li') {
+      currentList.push(item);
+    } else {
+      if (currentList.length > 0) {
+        groupedContent.push(
+          <ul key={`list-${i}`} className="list-disc list-inside space-y-2 mb-4 ml-4">
+            {currentList}
+          </ul>
+        );
+        currentList = [];
+      }
+      groupedContent.push(item);
+    }
+  }
+  
+  // Don't forget the last list if it exists
+  if (currentList.length > 0) {
+    groupedContent.push(
+      <ul key="final-list" className="list-disc list-inside space-y-2 mb-4 ml-4">
+        {currentList}
+      </ul>
+    );
+  }
+  
+  return groupedContent;
+};
+
 const ReportView = () => {
   const { call_id } = useParams<{ call_id: string }>();
   const navigate = useNavigate();
@@ -140,8 +211,8 @@ const ReportView = () => {
             <CardContent className="pt-6">
               {call.summary ? (
                 <div className="prose prose-sm max-w-none">
-                  <div className="whitespace-pre-wrap text-sm text-gray-900">
-                    {call.summary}
+                  <div className="text-gray-900">
+                    {formatSummary(call.summary)}
                   </div>
                 </div>
               ) : (
