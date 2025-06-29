@@ -25,6 +25,7 @@ const formatSummary = (summary: string) => {
   const lines = summary.split('\n');
   const formattedContent = [];
   let inNegativesSection = false;
+  let inPositivesSection = false;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -34,19 +35,53 @@ const formatSummary = (summary: string) => {
     // Check if we're entering the Negatives section
     if (line.toLowerCase().includes('negatives') && line.toLowerCase().includes('short')) {
       inNegativesSection = true;
+      inPositivesSection = false;
     }
-    // Check if we're leaving the Negatives section (next heading)
-    else if (inNegativesSection && (line.startsWith('#') || (line.match(/^[A-Z][a-zA-Z\s]+$/) && !line.includes('.')))) {
+    // Check if we're entering a Positives section
+    else if (line.toLowerCase().includes('positive') || 
+             line.toLowerCase().includes('strength') || 
+             line.toLowerCase().includes('benefit') ||
+             line.toLowerCase().includes('advantage')) {
+      inPositivesSection = true;
       inNegativesSection = false;
+    }
+    // Check if we're leaving current section (next heading)
+    else if ((inNegativesSection || inPositivesSection) && 
+             (line.startsWith('#') || (line.match(/^[A-Z][a-zA-Z\s]+$/) && !line.includes('.')))) {
+      // Determine if this is a positive or negative section
+      if (line.toLowerCase().includes('negatives') && line.toLowerCase().includes('short')) {
+        inNegativesSection = true;
+        inPositivesSection = false;
+      } else if (line.toLowerCase().includes('positive') || 
+                 line.toLowerCase().includes('strength') || 
+                 line.toLowerCase().includes('benefit') ||
+                 line.toLowerCase().includes('advantage')) {
+        inPositivesSection = true;
+        inNegativesSection = false;
+      } else {
+        inNegativesSection = false;
+        inPositivesSection = false;
+      }
     }
     
     // Check if it's a heading (starts with # or is a standalone title-like line)
     if (line.startsWith('#') || (line.match(/^[A-Z][a-zA-Z\s]+$/) && !line.includes('.'))) {
       const headingText = line.replace(/^#+\s*/, '');
       const isNegativesHeading = headingText.toLowerCase().includes('negatives') && headingText.toLowerCase().includes('short');
+      const isPositivesHeading = headingText.toLowerCase().includes('positive') || 
+                                 headingText.toLowerCase().includes('strength') || 
+                                 headingText.toLowerCase().includes('benefit') ||
+                                 headingText.toLowerCase().includes('advantage');
+      
+      let headingClass = 'text-lg font-bold mt-6 mb-3 first:mt-0 text-gray-900';
+      if (isNegativesHeading) {
+        headingClass = 'text-lg font-bold mt-6 mb-3 first:mt-0 text-red-800 bg-red-50 px-3 py-2 rounded-lg';
+      } else if (isPositivesHeading) {
+        headingClass = 'text-lg font-bold mt-6 mb-3 first:mt-0 text-green-800';
+      }
       
       formattedContent.push(
-        <h3 key={i} className={`text-lg font-bold mt-6 mb-3 first:mt-0 ${isNegativesHeading ? 'text-red-800 bg-red-50 px-3 py-2 rounded-lg' : 'text-gray-900'}`}>
+        <h3 key={i} className={headingClass}>
           {headingText}
         </h3>
       );
@@ -54,16 +89,32 @@ const formatSummary = (summary: string) => {
     // Check if it's a bullet point or should be formatted as one
     else if (line.startsWith('-') || line.startsWith('•') || line.match(/^\d+\./)) {
       const bulletText = line.replace(/^[-•]\s*/, '').replace(/^\d+\.\s*/, '');
+      let bulletClass = 'text-sm mb-2 text-gray-700';
+      
+      if (inNegativesSection) {
+        bulletClass = 'text-sm mb-2 text-red-700 font-medium';
+      } else if (inPositivesSection) {
+        bulletClass = 'text-sm mb-2 text-green-700';
+      }
+      
       formattedContent.push(
-        <li key={i} className={`text-sm mb-2 ${inNegativesSection ? 'text-red-700 font-medium' : 'text-gray-700'}`}>
+        <li key={i} className={bulletClass}>
           {bulletText}
         </li>
       );
     }
     // Regular paragraph text
     else {
+      let paragraphClass = 'text-sm mb-3 text-gray-700';
+      
+      if (inNegativesSection) {
+        paragraphClass = 'text-sm mb-3 text-red-700';
+      } else if (inPositivesSection) {
+        paragraphClass = 'text-sm mb-3 text-green-700';
+      }
+      
       formattedContent.push(
-        <p key={i} className={`text-sm mb-3 ${inNegativesSection ? 'text-red-700' : 'text-gray-700'}`}>
+        <p key={i} className={paragraphClass}>
           {line}
         </p>
       );
@@ -74,25 +125,34 @@ const formatSummary = (summary: string) => {
   const groupedContent = [];
   let currentList = [];
   let currentListIsNegative = false;
+  let currentListIsPositive = false;
   
   for (let i = 0; i < formattedContent.length; i++) {
     const item = formattedContent[i];
     
     if (item.type === 'li') {
       if (currentList.length === 0) {
-        // Determine if this list is in the negatives section based on the text color
+        // Determine if this list is in the negatives or positives section based on the text color
         currentListIsNegative = item.props.className.includes('text-red-700');
+        currentListIsPositive = item.props.className.includes('text-green-700');
       }
       currentList.push(item);
     } else {
       if (currentList.length > 0) {
+        let listClass = 'list-disc list-inside space-y-2 mb-4 ml-4';
+        if (currentListIsNegative) {
+          listClass += ' bg-red-50 p-3 rounded-lg';
+        }
+        // Note: No background highlighting for positive lists as requested
+        
         groupedContent.push(
-          <ul key={`list-${i}`} className={`list-disc list-inside space-y-2 mb-4 ml-4 ${currentListIsNegative ? 'bg-red-50 p-3 rounded-lg' : ''}`}>
+          <ul key={`list-${i}`} className={listClass}>
             {currentList}
           </ul>
         );
         currentList = [];
         currentListIsNegative = false;
+        currentListIsPositive = false;
       }
       groupedContent.push(item);
     }
@@ -100,8 +160,14 @@ const formatSummary = (summary: string) => {
   
   // Don't forget the last list if it exists
   if (currentList.length > 0) {
+    let listClass = 'list-disc list-inside space-y-2 mb-4 ml-4';
+    if (currentListIsNegative) {
+      listClass += ' bg-red-50 p-3 rounded-lg';
+    }
+    // Note: No background highlighting for positive lists as requested
+    
     groupedContent.push(
-      <ul key="final-list" className={`list-disc list-inside space-y-2 mb-4 ml-4 ${currentListIsNegative ? 'bg-red-50 p-3 rounded-lg' : ''}`}>
+      <ul key="final-list" className={listClass}>
         {currentList}
       </ul>
     );
